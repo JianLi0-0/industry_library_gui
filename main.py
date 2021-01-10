@@ -13,6 +13,30 @@ import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
+import rospy
+from std_msgs.msg import *
+from industry_library_robot.srv import *
+from geometry_msgs.msg import Pose
+import inspect
+import ctypes
+
+def _async_raise(tid, exctype):
+    """raises the exception, performs cleanup if needed"""
+    tid = ctypes.c_long(tid)
+    if not inspect.isclass(exctype):
+        exctype = type(exctype)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
+    if res == 0:
+        raise ValueError("invalid thread id")
+    elif res != 1:
+        # """if it returns a number greater than one, you're in trouble,
+        # and you should call it again with exc=NULL to revert the effect"""
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+
+def stop_thread(thread):
+    _async_raise(thread.ident, SystemExit)
+
 bouding_box_color = []
 for i in range(15):
     r = random.randint(0, 255)
@@ -33,9 +57,70 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pool = redis.ConnectionPool(host='localhost',port=6379)
         self.r = redis.Redis(connection_pool=self.pool)
         self.button = ''
+        self.ros_setup()
         self.start_process_picking()
         self.start_process_polishing()
-        
+    
+    def ros_setup(self):
+        self.pub = rospy.Publisher('chatter', String, queue_size=1)
+        self.tf_transfer_pub = rospy.Publisher('/camera_object_position', Pose, queue_size=1)
+        rospy.init_node('gui', anonymous=True)
+        self.rate = rospy.Rate(10)
+        self.ros_grasp = False
+        self.ros_move_home = False
+    
+    def pick_and_place_client(self, object_position, place_point):
+        rospy.wait_for_service('pick_and_place_service')
+        try:
+            pap = rospy.ServiceProxy('pick_and_place_service', pick_and_place)
+            pose = Pose()
+            pose.position.x = object_position[0]
+            pose.position.y = object_position[1]
+            pose.position.z = object_position[2]
+            pose.orientation.w = 1
+            self.tf_transfer_pub.publish(pose)
+            resp1 = pap(pose, place_point)
+            return resp1.is_successful
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+
+    def move_home_client(self):
+        rospy.wait_for_service('move_home_pose_service')
+        try:
+            pap = rospy.ServiceProxy('move_home_pose_service', pick_and_place)
+            pose = Pose()
+            resp1 = pap(pose, 0)
+            return resp1.is_successful
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+
+    def ros_grasping_thread(self):
+        while True:
+            if self.ros_grasp is True:
+                object = self.object_comboBox.currentText()
+                place_pt = self.place_pt_comboBox.currentText()
+                self.pick_and_place_client(self.object_list[object]['position'][0:3], int(place_pt[-1]))
+                self.ros_grasp = False
+                print("grasp object: " + object)
+
+            if self.ros_move_home is True:
+                self.move_home_client()
+                self.ros_move_home = False
+                print("move home")
+            time.sleep(0.1)
+
+    # def ros_broadcast_tf(self):
+    #     while self.ros_grasp is True:
+    #         br = tf.TransformBroadcaster()
+    #         object = self.object_comboBox.currentText()
+    #         p = self.object_list[object]['position']
+    #         br.sendTransform((p[0], p[1], p[2]),
+    #                         tf.transformations.quaternion_from_euler(0, 0, 0),
+    #                         rospy.Time.now(),
+    #                         "target_object",
+    #                         "camera_frame")
+    #         time.sleep(0.001)
+
     def self_defined_ui_variables(self):
         self.video_signal.connect(self.video_slot_func)
         self.video_signal_2.connect(self.video_slot_func_2)
@@ -48,8 +133,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.send_path_button.clicked.connect(self.click_send_path_button)
         self.emergency_stop_button_2.setStyleSheet("background-color: red")
         
-        t3 = threading.Thread(target=self.update_video_2)
-        t3.start()  
+        self.t3 = threading.Thread(target=self.update_video_2)
+        self.t3.start()
         
     def start_process_picking(self):
         self.object_list = []
@@ -64,15 +149,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.emergency_stop_button.setStyleSheet("background-color: red")
         self.object_comboBox.currentIndexChanged.connect(self.object_comboBox_selection_change)
                 #self.object_info_TextEdit.setPlainText("haha\nclick_move2home_button")
-        t1 = threading.Thread(target=self.update_combobox)
-        t1.start()
-        t2 = threading.Thread(target=self.update_video)
-        t2.start()
-        
+        self.t1 = threading.Thread(target=self.update_combobox)
+        self.t1.start()
+        self.t2 = threading.Thread(target=self.update_video)
+        self.t2.start()
+        self.t4 = threading.Thread(target=self.ros_grasping_thread)
+        self.t4.start()
+
     def click_select_object_Button(self):
         self.button = 'select_object'
         self.select_object_Button.setStyleSheet("background-color: green")
-       
+    
     def click_select_place_pt_Button(self):
         self.button = 'select_place_pt'
         self.select_place_pt_Button.setStyleSheet("background-color: green")
@@ -81,21 +168,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.object_info_TextEdit.setPlainText("样品名称:  "+ self.object_comboBox.currentText() + "\n")
 
     def click_move2home_button(self):
+        self.ros_move_home = True
         print("click_move2home_button")    
-    
+
     def click_grasp_button(self):
-        object = self.object_comboBox.currentText()
+        self.ros_grasp = True
         print("click_grasp_button")
-        print("grasp object: " + object)
         
     def click_place_button(self):
         #place_point = self.place_pt_plainTextEdit.toPlainText()
         #place_point = place_point[1:-1].split(',')
         #place_point = self.from_widget_to_camera([int(place_point[0]), int(place_point[1])])
-        place_pt = self.place_pt_comboBox.currentText()
-        print("click_place_button")
-        print("place point: " + place_pt)
-        
+        # place_pt = self.place_pt_comboBox.currentText()
+        # print("click_place_button")
+        # print("place point: " + place_pt)
+        stop_thread(self.t1)
+        stop_thread(self.t2)
+        stop_thread(self.t3)
+        stop_thread(self.t4)
+        exit()
+
+
+
+
     def click_emergency_stop_button(self):
         print("click_emergency_stop_button")    
     
@@ -137,7 +232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             img = Image.fromarray(raw_img, 'RGB')
             
             #print(img.shape)
-            for object_name in object_list:
+            '''for object_name in object_list:
                 # 画矩形框
                 [x1, y1, x2, y2] = object_list[object_name]['bounding_box'][0:4]
                 index = list(object_list.keys()).index(object_name)
@@ -148,7 +243,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 #cv2.putText(img, text, (x1, y1-7), font, 2, bouding_box_color[index], 1)
                 text_origin = np.array([x1, y1-16])
                 draw.text(text_origin, object_name, fill=(0, 0, 0), font=font)
-                del draw
+                del draw'''
             raw_img = np.asarray(img)
             img = QImage(raw_img.data, raw_img.shape[1], raw_img.shape[0], QImage.Format_BGR888)
             self.video_signal.emit(QPixmap.fromImage(img))

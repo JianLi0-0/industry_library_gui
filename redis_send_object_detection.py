@@ -11,11 +11,11 @@ fx = 50
 fy = 100
 
 dict = {'object_0': {'bounding_box':[fx, fy, fx+width, fy+height], # [x1, y1, x2, y2]
-                     'position': [1, 10, 100]}, 
+                     'position': [-0.4, 0.15, -0.95]}, 
         'object_2': {'bounding_box':[fx+x_i, fy, fx+x_i+width, fy+height],
-                     'position': [1, 10, 100]}, 
+                     'position': [-0.3, 0.15, -0.95]}, 
         'object_3': {'bounding_box':[fx+x_i*2, fy, fx+x_i*2+width, fy+height],
-                     'position': [1, 10, 100]}}
+                     'position': [-0.2, 0.15, -0.95]}}
 
 dict1 = {'object_1': {'bounding_box':[fx, fy, fx+width, fy+height], # [x1, y1, x2, y2]
                      'position': [1, 10, 100]}, 
@@ -32,8 +32,7 @@ if __name__ == '__main__':
     while True:
         r.hset('object_list', 'one', json.dumps(dict))
         time.sleep(1)
-        r.hset('object_list', 'one', json.dumps(dict1))
-        time.sleep(1)        
+
 
     
         

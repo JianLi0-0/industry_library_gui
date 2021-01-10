@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1030, 692)
+        MainWindow.resize(1052, 774)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -89,8 +89,6 @@ class Ui_MainWindow(object):
         self.gridLayout_8.addWidget(self.object_info_TextEdit, 1, 0, 1, 2)
 
         self.object_comboBox = QComboBox(self.groupBox_9)
-        self.object_comboBox.addItem("")
-        self.object_comboBox.addItem("")
         self.object_comboBox.setObjectName(u"object_comboBox")
 
         self.gridLayout_8.addWidget(self.object_comboBox, 2, 1, 1, 1)
@@ -298,7 +296,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1030, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1052, 31))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -322,15 +320,12 @@ class Ui_MainWindow(object):
         self.pushButton_13.setText(QCoreApplication.translate("MainWindow", u"\u6d4f\u89c8", None))
         self.groupBox_9.setTitle(QCoreApplication.translate("MainWindow", u"\u6837\u54c1\u68c0\u6d4b\u53ca\u5339\u914d", None))
         self.object_info_TextEdit.setPlainText("")
-        self.object_comboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"\u6837\u54c11", None))
-        self.object_comboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"\u6837\u54c12", None))
-
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"\u6837\u54c1\u4fe1\u606f", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u6837\u54c1", None))
         self.groupBox_10.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236", None))
         self.grasp_button.setText(QCoreApplication.translate("MainWindow", u"\u6293\u53d6\u6837\u54c1", None))
         self.move2home_button.setText(QCoreApplication.translate("MainWindow", u"\u79fb\u52a8\u81f3home\u4f4d\u7f6e", None))
-        self.place_button.setText(QCoreApplication.translate("MainWindow", u"\u653e\u7f6e\u6837\u54c1", None))
+        self.place_button.setText(QCoreApplication.translate("MainWindow", u"\u7ed3\u675f\u7a0b\u5e8f", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"\u9009\u62e9\u653e\u7f6e\u70b9", None))
         self.place_pt_comboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"\u653e\u7f6e\u70b91", None))
         self.place_pt_comboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"\u653e\u7f6e\u70b92", None))

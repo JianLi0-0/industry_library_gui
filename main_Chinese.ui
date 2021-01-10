@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
-    <height>692</height>
+    <width>1052</width>
+    <height>774</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -192,7 +192,7 @@
             <item row="7" column="0" colspan="2">
              <widget class="QPushButton" name="place_button">
               <property name="text">
-               <string>放置样品</string>
+               <string>结束程序</string>
               </property>
              </widget>
             </item>
@@ -501,8 +501,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1030</width>
-     <height>22</height>
+     <width>1052</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>
