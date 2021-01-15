@@ -137,7 +137,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.t3.start()
         
     def start_process_picking(self):
-        self.object_list = []
+        self.object_list = dict()
         #self.video_label.mousePressEvent = self.get_image_pos
         #self.select_object_Button.clicked.connect(self.click_select_object_Button)
         #self.select_place_pt_Button.clicked.connect(self.click_select_place_pt_Button)
@@ -213,12 +213,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             object_list = self.r.hget('object_list', 'one')
             object_list = str(object_list, encoding='utf-8')
             object_list = json.loads(object_list)
-            if operator.eq(object_list, self.object_list) is False:
+            # print("object_list:{}, self.object_list:{}".format(object_list.keys(), self.object_list.keys()))
+            if operator.eq(object_list.keys(), self.object_list.keys()) is False:
                 self.object_comboBox.clear()
                 #self.object_comboBox.addItem("--Select--")
                 self.object_comboBox.addItems(list(object_list.keys()))
                 self.object_list = object_list
-                #print("change combobox")
+                print("change combobox")
             time.sleep(1)
             
     def update_video(self):
