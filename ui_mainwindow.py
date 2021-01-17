@@ -208,20 +208,20 @@ class Ui_MainWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.SpanningRole, self.plainTextEdit_3)
 
-        self.select_place_pt_Button_2 = QPushButton(self.groupBox_5)
-        self.select_place_pt_Button_2.setObjectName(u"select_place_pt_Button_2")
+        self.set_path_button = QPushButton(self.groupBox_5)
+        self.set_path_button.setObjectName(u"set_path_button")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.select_place_pt_Button_2)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.set_path_button)
 
-        self.select_object_Button_2 = QPushButton(self.groupBox_5)
-        self.select_object_Button_2.setObjectName(u"select_object_Button_2")
+        self.confirm_path_button = QPushButton(self.groupBox_5)
+        self.confirm_path_button.setObjectName(u"confirm_path_button")
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.select_object_Button_2)
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.confirm_path_button)
 
-        self.pushButton_10 = QPushButton(self.groupBox_5)
-        self.pushButton_10.setObjectName(u"pushButton_10")
+        self.send_path_button = QPushButton(self.groupBox_5)
+        self.send_path_button.setObjectName(u"send_path_button")
 
-        self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.pushButton_10)
+        self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.send_path_button)
 
         self.splitter_2.addWidget(self.groupBox_5)
         self.groupBox_6 = QGroupBox(self.splitter_2)
@@ -296,7 +296,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1052, 31))
+        self.menubar.setGeometry(QRect(0, 0, 1052, 28))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -304,7 +304,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -341,9 +341,9 @@ class Ui_MainWindow(object):
         self.pushButton_9.setText(QCoreApplication.translate("MainWindow", u"\u6d4f\u89c8", None))
         self.groupBox_5.setTitle(QCoreApplication.translate("MainWindow", u"\u4ea4\u4e92\u751f\u6210\u6253\u78e8\u8def\u5f84", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u8def\u5f84\u4fe1\u606f", None))
-        self.select_place_pt_Button_2.setText(QCoreApplication.translate("MainWindow", u"\u5bfc\u5165\u8def\u5f84", None))
-        self.select_object_Button_2.setText(QCoreApplication.translate("MainWindow", u"\u5bfc\u51fa\u8def\u5f84", None))
-        self.pushButton_10.setText(QCoreApplication.translate("MainWindow", u"\u8def\u5f84\u9884\u89c8", None))
+        self.set_path_button.setText(QCoreApplication.translate("MainWindow", u"\u8bbe\u7f6e\u8def\u5f84", None))
+        self.confirm_path_button.setText(QCoreApplication.translate("MainWindow", u"\u786e\u8ba4\u8def\u5f84", None))
+        self.send_path_button.setText(QCoreApplication.translate("MainWindow", u"\u53d1\u9001\u8def\u5f84", None))
         self.groupBox_6.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"\u60ef\u6027", None))
         self.plainTextEdit_7.setPlainText(QCoreApplication.translate("MainWindow", u"100", None))
