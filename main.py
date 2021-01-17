@@ -16,7 +16,8 @@ from PIL import Image, ImageDraw, ImageFont
 import rospy
 from std_msgs.msg import *
 from industry_library_robot.srv import *
-from geometry_msgs.msg import Pose
+from ultrasound_robot.srv import *
+from geometry_msgs.msg import Pose, PoseArray
 import inspect
 import ctypes
 
@@ -45,7 +46,7 @@ for i in range(15):
     bouding_box_color.append((r,g,b))
 
 camera_width = 640
-camera_height = 360
+camera_height = 480
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     video_signal = Signal(QPixmap)
@@ -68,6 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.rate = rospy.Rate(10)
         self.ros_grasp = False
         self.ros_move_home = False
+        self.wipe_bb = False
     
     def pick_and_place_client(self, object_position, place_point):
         rospy.wait_for_service('pick_and_place_service')
@@ -94,7 +96,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
 
-    def ros_grasping_thread(self):
+    def wipe_blackboard_client(self, waypoints):
+        rospy.wait_for_service('wipe_blackboard_service')
+        try:
+            wbb = rospy.ServiceProxy('wipe_blackboard_service', wipe_bb)
+            pose_array = PoseArray()
+            for pt in waypoints:
+                pose = Pose()
+                pose.position.x = pt[0]
+                pose.position.y = pt[1]
+                pose_array.poses.append(pose)
+            resp1 = wbb(pose_array)
+            return resp1.is_successful
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+
+    def ros_service_thread(self):
         while True:
             if self.ros_grasp is True:
                 object = self.object_comboBox.currentText()
@@ -107,6 +124,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.move_home_client()
                 self.ros_move_home = False
                 print("move home")
+
+            if self.wipe_bb is True:
+                print("self.wipe_bb", self.wipe_bb)
+                waypoints = self.selected_pts
+                self.wipe_blackboard_client(waypoints)
+                self.selected_pts.clear()
+                self.wipe_bb = False
+                print("wipe blackboard")
+                
             time.sleep(0.1)
 
     # def ros_broadcast_tf(self):
@@ -127,10 +153,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def start_process_polishing(self):
         self.selected_pts = []
-        #self.video_label_2.mousePressEvent = self.get_image_pos_2
-        #self.set_path_button.clicked.connect(self.click_set_path_button)
-        #self.confirm_path_button.clicked.connect(self.click_confirm_path_button)
-        #self.send_path_button.clicked.connect(self.click_send_path_button)
+        self.video_label_2.mousePressEvent = self.get_image_pos_2
+        self.set_path_button.clicked.connect(self.click_set_path_button)
+        self.confirm_path_button.clicked.connect(self.click_confirm_path_button)
+        self.send_path_button.clicked.connect(self.click_send_path_button)
         self.emergency_stop_button_2.setStyleSheet("background-color: red")
         
         self.t3 = threading.Thread(target=self.update_video_2)
@@ -153,7 +179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.t1.start()
         self.t2 = threading.Thread(target=self.update_video)
         self.t2.start()
-        self.t4 = threading.Thread(target=self.ros_grasping_thread)
+        self.t4 = threading.Thread(target=self.ros_service_thread)
         self.t4.start()
 
     def click_select_object_Button(self):
@@ -206,7 +232,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def click_send_path_button(self):
         print("Send path to robot")
-        self.selected_pts.clear()
+        self.wipe_bb = True
+        # self.selected_pts.clear()
         
     def update_combobox(self):
         while True:
@@ -251,22 +278,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             time.sleep(0.03)
             
     def update_video_2(self):
+        radius = 3 # 3 pixel
         while True:
-            img = redis_img_receiver.fromRedis(self.r,'image')
+            raw_img = redis_img_receiver.fromRedis(self.r,'image')
+            #img = cv2.resize(img, (camera_width, camera_height))
+            img = Image.fromarray(raw_img, 'RGB')
             points = self.selected_pts
-            #if len(points) > 0:
-                #for pt in points:
-                    #cv2.circle(img, (pt[0],pt[1]), 8, (255,0,0), 3)
-                    ##draw circle
-                    ##circle(img, center, radius, color, thickness=None, lineType=None, shift=None)
-                #if len(points) > 1:
-                    #for i in range(len(points)-1):
-                        #cv2.line(img, (points[i][0],points[i][1]), (points[i+1][0],points[i+1][1]), (255,0,0), 2)
-                        ##draw line
-                        ##line(img, pt1, pt2, color, thickness=None, lineType=None, shift=None):
-            img = QImage(img.data, img.shape[1], img.shape[0], QImage.Format_BGR888)
+            draw = ImageDraw.Draw(img)
+            if len(points) > 0:
+                for pt in points:
+                    # cv2.circle(img, (), 8, (255,0,0), 3)
+                    draw.ellipse((pt[0]-radius,pt[1]-radius, pt[0]+radius,pt[1]+radius), fill = (255, 0, 0))
+                    #draw circle
+                if len(points) > 1:
+                    for i in range(len(points)-1):
+                        # cv2.line(img, (points[i][0],points[i][1]), (points[i+1][0],points[i+1][1]), (255,0,0), 2)
+                        draw.line((points[i][0],points[i][1], points[i+1][0],points[i+1][1]), fill = 128)
+                        #draw line
+                        #line(img, pt1, pt2, color, thickness=None, lineType=None, shift=None):
+            raw_img = np.asarray(img)
+            img = QImage(raw_img.data, raw_img.shape[1], raw_img.shape[0], QImage.Format_BGR888)
             self.video_signal_2.emit(QPixmap.fromImage(img))
-            time.sleep(0.05)
+            time.sleep(0.03)
 
     @Slot(QImage)
     def video_slot_func(self, img):
@@ -359,8 +392,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return object_list
     
     def from_widget_to_camera(self, pt):     
-        pt[0] = int(camera_width*pt[0]/self.video_label.width())
-        pt[1] = int(camera_height*pt[1]/self.video_label.height())
+        # print("pt:{} {}    video_label{} {}".format(pt[0], pt[1], self.video_label.width(), self.video_label.height()))
+        pt[0] = int(camera_width*pt[0]/self.video_label_2.width())
+        pt[1] = int(camera_height*pt[1]/self.video_label_2.height())
+        # print("pt:{} {}    video_label{} {}".format(pt[0], pt[1], self.video_label.width(), self.video_label.height()))
         return pt
     
     def exit(self):
