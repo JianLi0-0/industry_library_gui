@@ -81,6 +81,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             pose.position.z = object_position[2]
             pose.orientation.w = 1
             self.tf_transfer_pub.publish(pose)
+            print("object location: "+str(pose))
             resp1 = pap(pose, place_point)
             return resp1.is_successful
         except rospy.ServiceException as e:
@@ -114,9 +115,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def ros_service_thread(self):
         while True:
             if self.ros_grasp is True:
+                object_list = self.r.hget('object_list', 'one')
+                object_list = str(object_list, encoding='utf-8')
+                object_list = json.loads(object_list)
                 object = self.object_comboBox.currentText()
                 place_pt = self.place_pt_comboBox.currentText()
-                self.pick_and_place_client(self.object_list[object]['position'][0:3], int(place_pt[-1]))
+                self.pick_and_place_client(object_list[object]['position'][0:3], int(place_pt[-1]))
                 self.ros_grasp = False
                 print("grasp object: " + object)
 
