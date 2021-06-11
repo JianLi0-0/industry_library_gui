@@ -71,7 +71,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ros_move_home = False
         self.wipe_bb = False
     
-    def pick_and_place_client(self, object_position, place_point):
+    def pick_and_place_client(self, object_position, place_point, object_name):
         rospy.wait_for_service('pick_and_place_service')
         try:
             pap = rospy.ServiceProxy('pick_and_place_service', pick_and_place)
@@ -82,7 +82,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             pose.orientation.w = 1
             self.tf_transfer_pub.publish(pose)
             print("object location: "+str(pose))
-            resp1 = pap(pose, place_point)
+            resp1 = pap(pose, place_point, object_name)
             return resp1.is_successful
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         try:
             pap = rospy.ServiceProxy('move_home_pose_service', pick_and_place)
             pose = Pose()
-            resp1 = pap(pose, 0)
+            resp1 = pap(pose, "0", "none")
             return resp1.is_successful
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 object_list = json.loads(object_list)
                 object = self.object_comboBox.currentText()
                 place_pt = self.place_pt_comboBox.currentText()
-                self.pick_and_place_client(object_list[object]['position'][0:3], int(place_pt[-1]))
+                self.pick_and_place_client(object_list[object]['position'][0:3], str(place_pt[-1]), object)
                 self.ros_grasp = False
                 print("grasp object: " + object)
 
@@ -161,6 +161,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_path_button.clicked.connect(self.click_set_path_button)
         self.confirm_path_button.clicked.connect(self.click_confirm_path_button)
         self.send_path_button.clicked.connect(self.click_send_path_button)
+        self.emergency_stop_button_2.clicked.connect(self.click_emergency_stop_button)
         self.emergency_stop_button_2.setStyleSheet("background-color: red")
         
         self.t3 = threading.Thread(target=self.update_video_2)
@@ -222,9 +223,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def click_emergency_stop_button(self):
-        print("click_emergency_stop_button")    
+        print("click_emergency_stop_button")   
+        stop_thread(self.t1)
+        stop_thread(self.t2)
+        stop_thread(self.t3)
+        stop_thread(self.t4)
+        exit() 
     
-        
     def click_set_path_button(self):
         self.button = 'set_path'
         self.set_path_button.setStyleSheet("background-color: green")    
@@ -237,7 +242,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def click_send_path_button(self):
         print("Send path to robot")
         self.wipe_bb = True
-        # self.selected_pts.clear()
+        self.selected_pts.clear()
         
     def update_combobox(self):
         while True:

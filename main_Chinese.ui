@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1052</width>
-    <height>774</height>
+    <width>1032</width>
+    <height>701</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_1">
        <attribute name="title">
@@ -487,11 +487,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3">
-       <attribute name="title">
-        <string>标定</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -501,8 +496,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1052</width>
-     <height>28</height>
+     <width>1032</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>

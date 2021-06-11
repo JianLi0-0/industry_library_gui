@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_Chinese.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.15.1
+## Created by: Qt User Interface Compiler version 5.15.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1052, 774)
+        MainWindow.resize(1032, 701)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -287,16 +287,13 @@ class Ui_MainWindow(object):
         self.gridLayout_7.addWidget(self.splitter_2, 2, 1, 1, 1)
 
         self.tabWidget.addTab(self.tab_2, "")
-        self.tab_3 = QWidget()
-        self.tab_3.setObjectName(u"tab_3")
-        self.tabWidget.addTab(self.tab_3, "")
 
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1052, 28))
+        self.menubar.setGeometry(QRect(0, 0, 1032, 31))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -304,7 +301,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -356,6 +353,5 @@ class Ui_MainWindow(object):
         self.confirm_button.setText(QCoreApplication.translate("MainWindow", u"\u6267\u884c\u8def\u5f84", None))
         self.emergency_stop_button_2.setText(QCoreApplication.translate("MainWindow", u"\u7d27\u6025\u505c\u6b62", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u6253\u78e8", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("MainWindow", u"\u6807\u5b9a", None))
     # retranslateUi
 
